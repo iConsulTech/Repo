@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.iconsultech" version="1.0.0" name=" [COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Repository[/B][/COLOR]" provider-name=" [COLOR dodgerblue]i[/COLOR][COLOR white]ConsulTech Wizard[/COLOR]">
+  <extension point="xbmc.addon.repository" name="iConsulTech Repository">
+    <info compressed="false">https://github.com/iConsulTech/Repo/raw/master/zips/addons.xml</info>
+    <checksum>https://github.com/iConsulTech/Repo/raw/master/zips/addons.xml.md5</checksum>
+    <datadir zip="true">https://raw.github.com/iConsulTech/Repo/master/zips</datadir>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>iConsulTech System Tools</summary>
+    <description>Update | Backup | Restore Tools For Your System</description>
+    <platform>all</platform>
+  </extension>
+</addon>
