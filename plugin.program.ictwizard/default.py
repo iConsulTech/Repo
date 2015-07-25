@@ -4,26 +4,35 @@ import urllib2,urllib
 import re
 import extract
 import time
-import downloader #ADDED MYSELF
+import downloader
 import zipfile
 import plugintools
 import ntpath
 import tools
+import cache
+import requests
+#import beautifulsoup
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE GLOBAL VARIABLES
-USER_AGENT   =  'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3' #ADDED MYSELF
-base         =  'http://iconsultech.tk/tools/' #ADDED MYSELF
-fanart       =  'http://iconsultech.tk/tools/images/fanart.jpg'
+USER_AGENT   =  'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+base         =  'http://iconsultech.uk/tools/'
+fanart       =  'http://iconsultech.uk/tools/images/fanart.jpg'
+ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons',''))
 ADDON        =  xbmcaddon.Addon(id='plugin.program.ictwizard')
 AddonID      =  'plugin.program.ictwizard'
+ICTADDONPATH  =  xbmc.translatePath(os.path.join(ADDONS,AddonID,'default.py'))
 zip          =  ADDON.getSetting('zip')
 dialog       =  xbmcgui.Dialog()
 dp           =  xbmcgui.DialogProgress()
 USERDATA     =  xbmc.translatePath(os.path.join('special://home/userdata',''))
 ADDON_DATA   =  xbmc.translatePath(os.path.join(USERDATA,'addon_data'))
+userdatafolder = xbmc.translatePath(os.path.join(ADDON_DATA,AddonID))
+THUMBNAILS   =  xbmc.translatePath(os.path.join(USERDATA,'Thumbnails'))
 ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons'))
 GUI          =  xbmc.translatePath(os.path.join(USERDATA,'guisettings.xml'))
+GUIFIX       =  xbmc.translatePath(os.path.join(USERDATA,'guifix.xml'))
+GUINEW       =  xbmc.translatePath(os.path.join(userdatafolder,'guinew.xml'))
 FAVS         =  xbmc.translatePath(os.path.join(USERDATA,'favourites.xml'))
 SOURCE       =  xbmc.translatePath(os.path.join(USERDATA,'sources.xml'))
 ADVANCED     =  xbmc.translatePath(os.path.join(USERDATA,'advancedsettings.xml'))
@@ -31,34 +40,49 @@ RSS          =  xbmc.translatePath(os.path.join(USERDATA,'RssFeeds.xml'))
 KEYMAPS      =  xbmc.translatePath(os.path.join(USERDATA,'keymaps','keyboard.xml'))
 USB          =  xbmc.translatePath(os.path.join(zip))
 skin         =  xbmc.getSkinDir()
-EXCLUDES     =  ['plugin.program.ictwizard'] #ADDED MYSELF
-HOME         =  xbmc.translatePath('special://home/') #ADDED MYSELF
-GUIFIX       = '#' #ADDED MYSELF
+EXCLUDES     =  ['plugin.program.ictwizard', 'script.module.requests']
+HOME         =  xbmc.translatePath('special://home/')
+tempfile     =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'temp.xml'))
+guitemp      =  xbmc.translatePath(os.path.join(userdatafolder,'guitemp',''))
+idfile       =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'id.xml'))
 
-VERSION      = "1.0.0"
+VERSION      = "1.0.1"
 PATH         = "iConsulTech Wizard"
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE MENU ITEMS AND LINKS
 def CATEGORIES(localbuildcheck,localversioncheck,id):
-#ADDED MYSELF
+#    response = tools.ICT_LOGIN()
+
+#    if 'login_error' in response:
+#        tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
+#        addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg','fanart','Backup Your Full System')
+#        addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg','fanart','Restore Your Full System')
+#        addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg','fanart','Delete Downloaded Zip Files')
+#        addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg','fanart','Wipe Your Entire Kodi Install')
+#        addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
+
     #updatecheck = CHECK_FOR_UPDATE(localbuildcheck,localversioncheck,id)
     #if updatecheck == True:
         #addDir('','[COLOR=dodgerblue]'+localbuildcheck+':[/COLOR] [COLOR=lime]NEW VERSION AVAILABLE[/COLOR]',id,'showinfo','icon.png','','','')
     #else:
         #addDir('','[COLOR=lime]Current Build Installed: [/COLOR][COLOR=dodgerblue]'+localbuildcheck+'[/COLOR]',id,'showinfo','icon.png','','','')
-    link = tools.OPEN_URL('http://iconsultech.tk/tools/wizard/wizard.txt').replace('\n','').replace('\r','')
-    match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
-    for name,url,iconimage,fanart,description in match:
-        addDir(name,url,7,iconimage,fanart,description)
-    setView('movies', 'MAIN')
-    #addDir('[COLOR dodgerblue]GUI[/COLOR] & Menu Fix','GUIFIX',9,'http://iconsultech.tk/tools/images/gui.jpg','fanart','Fix Your guisettings.xml')
-    #addDir('[COLOR dodgerblue]Check For Update[/COLOR] Settings','url',10,'http://iconsultech.tk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
-    addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.tk/tools/images/backup.jpg','fanart','Backup Your Full System')
-    addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.tk/tools/images/restore.jpg','fanart','Restore Your Full System')
-    addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.tk/tools/images/wipe.jpg','fanart','Wipe Your Entire Kodi Install')
-    addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.tk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
 
+    #addDir('[COLOR dodgerblue]GUI[/COLOR] & Menu Fix','GUIFIX',9,'http://iconsultech.uk/tools/images/gui.jpg','fanart','Fix Your guisettings.xml')
+    #addDir('[COLOR dodgerblue]Check For Update[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
+    #else:
+    #    username = ADDON.getSetting('username')
+    #    tools.NOTIFY('Login Successful', 'Welcome back '+username,'4000','tick.png')
+        link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard.txt').replace('\n','').replace('\r','')
+        match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
+        for name,url,iconimage,fanart,description in match:
+            addDir(name,url,13,iconimage,fanart,description)
+        setView('movies', 'MAIN')
+        addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
+        addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
+        addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
+        addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
+        addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO CHECK BUILD VERSION
 #def CHECK_FOR_UPDATE(localbuildcheck,localversioncheck,id):
@@ -73,36 +97,35 @@ def CATEGORIES(localbuildcheck,localversioncheck,id):
         #return False
 
 #---------------------------------------------------------------------------------------------------
-def XfinityInstaller():
+def ICONSULTECH():
     path = os.path.join(xbmc.translatePath('special://home'),'userdata', 'sources.xml')
     if not os.path.exists(path):
         f = open(path, mode='w')
-        f.write('<sources><files><source><name>.[COLOR blue]X[/COLOR]finity Installer</name><path pathversion="1">http://xfinity.xunitytalk.com</path></source></files></sources>')
+        f.write('<sources><files><source><name>.iConsulTech</name><path pathversion="1">http://repo.iconsultech.uk</path></source></files></sources>')
         f.close()
         return
 
     f   = open(path, mode='r')
     str = f.read()
     f.close()
-    if not'http://xfinity.xunitytalk.com' in str:
+    if not'http://repo.iconsultech.uk' in str:
         if '</files>' in str:
-            str = str.replace('</files>','<source><name>.[COLOR blue]X[/COLOR]finity Installer</name><path pathversion="1">http://xfinity.xunitytalk.com</path></source></files>')
+            str = str.replace('</files>','<source><name>.iConsulTech</name><path pathversion="1">http://repo.iconsultech.uk</path></source></files>')
             f = open(path, mode='w')
             f.write(str)
             f.close()
         else:
-            str = str.replace('</sources>','<files><source><name>.[COLOR blue]X[/COLOR]finity Installer</name><path pathversion="1">http://xfinity.xunitytalk.com</path></source></files></sources>')
+            str = str.replace('</sources>','<files><source><name>.iConsulTech</name><path pathversion="1">http://repo.iconsultech.uk</path></source></files></sources>')
             f = open(path, mode='w')
             f.write(str)
             f.close()
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO DOWNLOAD AND UPDATE KODI BUILD
-#ADDED MYSELF
-def UPDATE_WIZARD(name,url,description):
+#FUNCTION TO DOWNLOAD AND UPDATE PREMIUM KODI BUILD
+def FREE_UPDATE_WIZARD(name,url,description):
     choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'This full system update will [COLOR red][B]OVERWRITE[/B][/COLOR] everything on your current install including settings. Would you like to create a [COLOR lime][B]BACKUP[/B][/COLOR]?', yeslabel='YES, BACKUP',nolabel='NO, CONTINUE')
     if choice == 1:
-        BACKUP()
+        FULL_UNIVERSAL_BACKUP()
     elif choice == 0:
         pass
     dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'Kodi may [COLOR red][B]AUTO FORCE CLOSE[/B][/COLOR] to finish the update or it will prompt you to do it [COLOR lime][B]MANUALLY[/B][/COLOR].','')
@@ -123,21 +146,21 @@ def UPDATE_WIZARD(name,url,description):
     ictpath = xbmc.translatePath(os.path.join(ADDONS,AddonID,''))
     icttemp = xbmc.translatePath(os.path.join(HOME,'..','ictwizard.zip'))
     tools.ARCHIVE_FILE(ictpath, icttemp)
-    #deppath = xbmc.translatePath(os.path.join(ADDONS,'script.module.addon.common',''))
-    #deptemp = xbmc.translatePath(os.path.join(HOME,'..','ictwizarddep.zip'))
-    #tools.ARCHIVE_FILE(deppath, deptemp)
+    requestspath = xbmc.translatePath(os.path.join(ADDONS,'script.module.requests',''))
+    requeststemp = xbmc.translatePath(os.path.join(HOME,'..','requestsmodule.zip'))
+    tools.ARCHIVE_FILE(requestspath, requeststemp)
     tools.DESTROY_PATH(ADDONS)
     if not os.path.exists(ictpath):
         os.makedirs(ictpath)
-    #if not os.path.exists(deppath):
-        #os.makedirs(deppath)
+    if not os.path.exists(requestspath):
+        os.makedirs(requestspath)
     dp.close()
     time.sleep(1)
     dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Extracting Update File.. ",'', 'Please Wait')
     tools.READ_ZIP(icttemp)
     extract.all(icttemp,ictpath,dp)
-    #tools.READ_ZIP(deptemp)
-    #extract.all(deptemp,deppath,dp)
+    tools.READ_ZIP(requeststemp)
+    extract.all(requeststemp,requestspath,dp)
     print '======================================='
     print addonfolder
     print '======================================='
@@ -159,11 +182,85 @@ def UPDATE_WIZARD(name,url,description):
     #dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "Update process is almost complete, please [COLOR lime][B]CHANGE THE SKIN[/B][/COLOR] to the one this build was designed for.",'Then to finish the update please [COLOR white]FORCE CLOSE[/COLOR] Kodi','')
     #xbmc.executebuiltin("ActivateWindow(appearancesettings)")
     #time.sleep(1)
-    KILLXBMC()
+    tools.KILL_XBMC()
+
+#---------------------------------------------------------------------------------------------------
+#FUNCTION TO DOWNLOAD AND UPDATE PREMIUM KODI BUILD
+def UPDATE_WIZARD(name,url,description):
+    username = ADDON.getSetting('username')
+    password = ADDON.getSetting('password')
+    if username == '':
+        if password == '':
+            tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
+            return
+    response = tools.ICT_LOGIN()
+    if 'login_error' in response:
+        tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
+        return
+    else:
+        choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'This full system update will [COLOR red][B]OVERWRITE[/B][/COLOR] everything on your current install including settings. Would you like to create a [COLOR lime][B]BACKUP[/B][/COLOR]?', yeslabel='YES, BACKUP',nolabel='NO, CONTINUE')
+        if choice == 1:
+            FULL_UNIVERSAL_BACKUP()
+        elif choice == 0:
+            pass
+    dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'Kodi may [COLOR red][B]AUTO FORCE CLOSE[/B][/COLOR] to finish the update or it will prompt you to do it [COLOR lime][B]MANUALLY[/B][/COLOR].','')
+    updatepath = xbmc.translatePath(os.path.join('special://home','Update'))
+    if not os.path.exists(updatepath):
+        os.makedirs(updatepath)
+    dp = xbmcgui.DialogProgress()
+    dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Downloading Update.. ",'', 'Please Wait')
+    lib=os.path.join(updatepath, name+'.zip')
+    try:
+       os.remove(lib)
+    except:
+       pass
+    downloader.download(url, lib, dp)
+    addonfolder = xbmc.translatePath(os.path.join('special://','home'))
+    time.sleep(1)
+#ZIP UP WIZARD ADDON WIPE ADDONS AND THEN UNZIP ADDON
+    ictpath = xbmc.translatePath(os.path.join(ADDONS,AddonID,''))
+    icttemp = xbmc.translatePath(os.path.join(HOME,'..','ictwizard.zip'))
+    tools.ARCHIVE_FILE(ictpath, icttemp)
+    requestspath = xbmc.translatePath(os.path.join(ADDONS,'script.module.requests',''))
+    requeststemp = xbmc.translatePath(os.path.join(HOME,'..','requestsmodule.zip'))
+    tools.ARCHIVE_FILE(requestspath, requeststemp)
+    tools.DESTROY_PATH(ADDONS)
+    if not os.path.exists(ictpath):
+        os.makedirs(ictpath)
+    if not os.path.exists(requestspath):
+        os.makedirs(requestspath)
+    dp.close()
+    time.sleep(1)
+    dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Extracting Update File.. ",'', 'Please Wait')
+    tools.READ_ZIP(icttemp)
+    extract.all(icttemp,ictpath,dp)
+    tools.READ_ZIP(requeststemp)
+    extract.all(requeststemp,requestspath,dp)
+    print '======================================='
+    print addonfolder
+    print '======================================='
+    tools.READ_ZIP(lib)
+    extract.all(lib,addonfolder,dp)
+    dp.close()
+    #dialog = xbmcgui.Dialog()
+    #time.sleep(1)
+    #xbmc.executebuiltin('UnloadSkin()')
+    #time.sleep(1)
+    #xbmc.executebuiltin('ReloadSkin()')
+    #time.sleep(1)
+    #xbmc.executebuiltin("ActivateWindow(appearancesettings)")
+    #while xbmc.executebuiltin("Window.IsActive(appearancesettings)"):
+    #    xbmc.sleep(500)
+    #try: xbmc.executebuiltin("LoadProfile(Master user)")
+    #except:
+    #    pass
+    #dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "Update process is almost complete, please [COLOR lime][B]CHANGE THE SKIN[/B][/COLOR] to the one this build was designed for.",'Then to finish the update please [COLOR white]FORCE CLOSE[/COLOR] Kodi','')
+    #xbmc.executebuiltin("ActivateWindow(appearancesettings)")
+    #time.sleep(1)
+    tools.KILL_XBMC()
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DOWNLOAD AND UPDATE GUI SETTINGS XML FILE
-#ADDED MYSELF
 """
 def GUI_WIZARD(name,url,description):
     choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'This is [COLOR white]STEP 2[/COLOR] which will [COLOR red]OVERWRITE[/COLOR] your current guisettings.xml. Would you like to [COLOR white][B]BACKUP[/B][/COLOR] your exsisting guisettings.xml?', yeslabel='Yes, Backup',nolabel='No')
@@ -191,76 +288,160 @@ def GUI_WIZARD(name,url,description):
                 'home/userdata/guisettings.xml')
     dialog = xbmcgui.Dialog()
     dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "To complete the GUI fix Kodi will now force close.",'','')
-    KILLXBMC()
+    tools.KILL_XBMC()
 """
+
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO CREATE A FULL BACKUP AS A ZIP FILE
-def BACKUP():
+#FUNCTION TO CREATE A FULL SYSTEM UNIVERSAL BACKUP - THIS RENAMES PATHS TO SPECIAL:// AND REMOVES UNWATNED FOLDERS
+def FULL_UNIVERSAL_BACKUP():
+    guisuccess=1
     if zip == '':
         dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','You have not set a location for your backup folder.\nPlease update the addon settings and try again.','','')
         ADDON.openSettings(sys.argv[0])
-    to_backup = xbmc.translatePath(os.path.join('special://','home'))
-    backup_zip = xbmc.translatePath(os.path.join(USB,'Full-Backup.zip'))
-    DeletePackages()
-    import zipfile
-
-    dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Backup In Progress..",'', 'Please Wait')
-    zipobj = zipfile.ZipFile(backup_zip , 'w', zipfile.ZIP_DEFLATED)
-    rootlen = len(to_backup)
-    for_progress = []
-    ITEM =[]
-    for base, dirs, files in os.walk(to_backup):
-        for file in files:
-            ITEM.append(file)
-    N_ITEM =len(ITEM)
-    for base, dirs, files in os.walk(to_backup):
-        for file in files:
-            for_progress.append(file)
-            progress = len(for_progress) / float(N_ITEM) * 100
-            dp.update(int(progress),"Backing Up..",'[COLOR yellow]%s[/COLOR]'%file, 'Please Wait')
-            fn = os.path.join(base, file)
-            if not 'temp' in dirs:
-                if not 'plugin.program.ictwizard' in dirs:
-                   import time
-                   CUNT= '01/01/1980'
-                   FILE_DATE=time.strftime('%d/%m/%Y', time.gmtime(os.path.getmtime(fn)))
-                   if FILE_DATE > CUNT:
-                       zipobj.write(fn, fn[rootlen:])
-    zipobj.close()
-    dp.close()
-    dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "Backup Completed", '','')
+    vq = tools.GET_KEYBOARD( heading="Enter a name for this backup" )
+    if ( not vq ): return False, 0
+    title = urllib.quote_plus(vq)
+    backup_zip = xbmc.translatePath(os.path.join(USB,title+'_backup.zip'))
+    exclude_dirs_full =  ['plugin.program.ictwizard']
+    exclude_files_full = ["xbmc.log","xbmc.old.log","kodi.log","kodi.old.log",'.DS_Store','.setup_complete','XBMCHelper.conf']
+    exclude_dirs =  ['plugin.program.ictwizard','cache', 'system', 'Thumbnails', "peripheral_data",'library','keymaps']
+    exclude_files = ["xbmc.log","xbmc.old.log","kodi.log","kodi.old.log","Textures13.db",'.DS_Store','.setup_complete','XBMCHelper.conf', 'advancedsettings.xml']
+    message_header = "Checking and Preparing Files"
+    message_header2 = "Creating Full System Backup"
+    message1 = "Archiving..."
+    message2 = ""
+    message3 = "Please Wait"
+    tools.FIX_SPECIAL(HOME)
+    tools.DELETE_PACKAGES()
+    tools.ARCHIVE_TREE(HOME, backup_zip, message_header2, message1, message2, message3, exclude_dirs, exclude_files)
+    time.sleep(1)
+    GUIname = xbmc.translatePath(os.path.join(USB, title+'_guisettings.zip'))
+    zf = zipfile.ZipFile(GUIname, mode='w')
+    try:
+        zf.write(GUI, 'guisettings.xml', zipfile.ZIP_DEFLATED) #Copy guisettings.xml
+    except: guisuccess=0
+    try:
+        zf.write(xbmc.translatePath(os.path.join(HOME,'userdata','profiles.xml')), 'profiles.xml', zipfile.ZIP_DEFLATED) #Copy profiles.xml
+    except: pass
+    zf.close()
+    if guisuccess == 0:
+        dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", '[COLOR red][B]FAILED![/B][/COLOR] The guisettings.xml file could not be found on your', 'system, please reboot and try again.', '')
+    else:
+        dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'Full System Backup was [COLOR lime][B]SUCCESSFUL[/B][/COLOR]!')
+        dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'You can find your backup plus the GUI settings here: [COLOR dodgerblue]'+backup_zip+'[/COLOR] [COLOR dodgerblue]'+GUIname+'[/COLOR]')
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO RESTORE BACKUP ZIP FILE CREATED BY THE WIZARD
-def RESTORE():
-    import time
-    dialog = xbmcgui.Dialog()
+#FUNCTION TO RESTORE LOCAL UNIVERSAL BACKUP
+def RESTORE_UNIVERSAL_BACKUP():
+    exitfunction=0
+    choice4=0
     if zip == '':
-        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Backup folder cannot be found.\nPlease update the addon settings and try again.','','')
+        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Backup folder cannot be found.\nPlease update the Wizard Settings and try again.','','')
         ADDON.openSettings(sys.argv[0])
+    filename = xbmcgui.Dialog().browse(1, 'Select the backup file you want to restore', 'files', '.zip', False, False, USB)
+    if filename == '':
+        return
+    if os.path.exists(GUINEW):
+        if os.path.exists(GUI):
+            os.remove(GUINEW)
+        else:
+            os.rename(GUINEW,GUI)
+    if os.path.exists(GUIFIX):
+        os.remove(GUIFIX)
+    if not os.path.exists(tempfile): #Function for debugging, creates a file that was created in previous call and subsequently deleted when run
+        localfile = open(tempfile, mode='w+')
+    if os.path.exists(guitemp):
+        os.removedirs(guitemp)
+    try: os.rename(GUI,GUINEW) #Rename guisettings.xml to guinew.xml so we can edit without XBMC interfering.
+    except:
+        dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]",'No guisettings.xml file has been found.', 'Please exit Kodi and try again','')
+        return
+    else:
+        time.sleep(1)
+        readfile = open(ICTADDONPATH, mode='r')
+        default_contents = readfile.read()
+        readfile.close()
+        tools.READ_ZIP(filename)
+        dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Checking..",'', 'Please Wait')
+        dp.update(0,"", "Extracting Backup File...")
+        extract.all(filename,HOME,dp)
+        time.sleep(1)
+        clean_title = ntpath.basename(filename)
+        writefile = open(idfile, mode='w+')
+        writefile.write('id="none"\nname="'+clean_title+' [COLOR=yellow](Partially installed)[/COLOR]"\nversion="none"')
+        writefile.close()
+        cbdefaultpy = open(ICTADDONPATH, mode='w+')
+        cbdefaultpy.write(default_contents)
+        cbdefaultpy.close()
+        try:
+            os.rename(GUI,GUIFIX)
+        except:
+            print"NO GUISETTINGS DOWNLOADED"
+        time.sleep(1)
+        localfile = open(GUINEW, mode='r') #Read the original skinsettings tags and store in memory ready to replace in guinew.xml
+        content = file.read(localfile)
+        file.close(localfile)
+        skinsettingsorig = re.compile('<skinsettings>[\s\S]*?<\/skinsettings>').findall(content)
+        skinorig  = skinsettingsorig[0] if (len(skinsettingsorig) > 0) else ''
+        skindefault = re.compile('<skin default[\s\S]*?<\/skin>').findall(content)
+        skindefaultorig  = skindefault[0] if (len(skindefault) > 0) else ''
+        lookandfeelorig = re.compile('<lookandfeel>[\s\S]*?<\/lookandfeel>').findall(content)
+        lookandfeel  = lookandfeelorig[0] if (len(lookandfeelorig) > 0) else ''
+        try:
+            localfile2 = open(GUIFIX, mode='r')
+            content2 = file.read(localfile2)
+            file.close(localfile2)
+            skinsettingscontent = re.compile('<skinsettings>[\s\S]*?<\/skinsettings>').findall(content2)
+            skinsettingstext  = skinsettingscontent[0] if (len(skinsettingscontent) > 0) else ''
+            skindefaultcontent = re.compile('<skin default[\s\S]*?<\/skin>').findall(content2)
+            skindefaulttext  = skindefaultcontent[0] if (len(skindefaultcontent) > 0) else ''
+            lookandfeelcontent = re.compile('<lookandfeel>[\s\S]*?<\/lookandfeel>').findall(content2)
+            lookandfeeltext  = lookandfeelcontent[0] if (len(lookandfeelcontent) > 0) else ''
+            replacefile = content.replace(skinorig,skinsettingstext).replace(lookandfeel,lookandfeeltext).replace(skindefaultorig,skindefaulttext)
+            writefile = open(GUINEW, mode='w+')
+            writefile.write(str(replacefile))
+            writefile.close()
+        except:
+            print"NO GUISETTINGS DOWNLOADED"
+        if os.path.exists(GUI):
+            os.remove(GUI)
+        os.rename(GUINEW,GUI)
+        try:
+            os.remove(GUIFIX)
+        except:
+            pass
+        os.makedirs(guitemp)
+        time.sleep(1)
+        xbmc.executebuiltin('UnloadSkin()')
+        time.sleep(1)
+        xbmc.executebuiltin('ReloadSkin()')
+        time.sleep(1)
+        xbmc.executebuiltin("ActivateWindow(appearancesettings)")
+        while xbmc.executebuiltin("Window.IsActive(appearancesettings)"):
+            xbmc.sleep(500)
+        try: xbmc.executebuiltin("LoadProfile(Master user)")
+        except: pass
+        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Step 1 complete. Now please change the skin to','the one this build was designed for. Once done come back','to this wizard and restore the guisettings.zip')
+        xbmc.executebuiltin("ActivateWindow(appearancesettings)")
 
-    lib=xbmc.translatePath(os.path.join(zip,'Full-Backup.zip'))
-    tools.READ_ZIP(lib)
-    dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Checking Backup File.. ",'', 'Please Wait')
-    HOME = xbmc.translatePath(os.path.join('special://','home'))
-
-    dp.update(0,"", "Extracting Backup File Contents...")
-    extract.all(lib,HOME,dp)
-    time.sleep(1)
-    XfinityInstaller()
-    xbmc.executebuiltin('UpdateLocalAddons ')
-    xbmc.executebuiltin("UpdateAddonRepos")
-    time.sleep(1)
-    xbmc.executebuiltin('UnloadSkin()')
-    xbmc.executebuiltin('ReloadSkin()')
-    xbmc.executebuiltin("LoadProfile(Master user)")
-    dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "Please Force Close Kodi to Finish the Restore", "","") #NEED TO CHANGE
-    KILLXBMC()
+#---------------------------------------------------------------------------------------------------
+#FUNCTION TO RESTORE LOCAL COPY OF GUISETTINGS_FIX
+def RESTORE_LOCAL_GUI():
+    import time
+    if zip == '':
+        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Backup folder cannot be found.\nPlease update the Wizard Settings and try again.','','')
+        ADDON.openSettings(sys.argv[0])
+    guifilename = xbmcgui.Dialog().browse(1, 'Select the guisettings zip file you want to restore', 'files', '.zip', False, False, USB)
+    if guifilename == '':
+        return
+    else:
+        local=1
+        GUI_Settings_Fix(guifilename,local)
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE THE BACKUP OPTIONS IN THE SYSTEM BACKUP TOOLS MENU
 def BACKUP_OPTION():
-    addDir('FULL SYSTEM BACKUP','url',3,'','','Backup Your Entire System',)
+    addDir('[COLOR blue]FULL SYSTEM BACKUP[/COLOR] + [COLOR blue]GUI SETTINGS[/COLOR]','url',3,'','','Backup Your Entire System',)
     addDir('Backup Addons [COLOR blue]ONLY[/COLOR]','addons',6,'','','Backup Your Addons')
     addDir('Backup Addon UserData [COLOR blue]ONLY[/COLOR]','addon_data',6,'','','Backup Your Addon Userdata')
     addDir('Backup Guisettings.xml',GUI,4,'','','Backup Your guisettings.xml')
@@ -278,8 +459,16 @@ def BACKUP_OPTION():
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE THE RESTORE OPTIONS IN THE SYSTEM RESTORE TOOLS MENU
 def RESTORE_OPTION():
-    if os.path.exists(os.path.join(USB,'Full-Backup.zip')):
-        addDir('FULL SYSTEM RESTORE','url',2,'','','Restore Your Entire System')
+    addDir('1. Select the [COLOR blue]BACKUP FILE[/COLOR] you want to restore..','url',2,'','','Restore Your Entire System')
+    addDir('2. Select the [COLOR blue]GUI SETTINGS ZIP FILE[/COLOR] you want to restore..','url',12,'','','Restore Your GUI Settings')
+
+#    for file in os.listdir(USB):
+#        if file.endswith("_backup.zip"):
+#            addDir('1. Select the [COLOR blue]BACKUP FILE[/COLOR] you want to restore..','url',2,'','','Restore Your Entire System')
+
+#    for file in os.listdir(USB):
+#        if file.endswith("_guisettings.zip"):
+#            addDir('2. Select the [COLOR blue]GUI SETTINGS ZIP FILE[/COLOR] you want to restore..','url',12,'','','Restore Your GUI Settings')
 
     if os.path.exists(os.path.join(USB,'addons.zip')):
         addDir('Restore Addons [COLOR blue]ONLY[/COLOR]','addons',6,'','','Restore Your Addons')
@@ -325,7 +514,7 @@ def RESTORE_ZIP_FILE(url):
 
 
     if 'Backup' in name:
-        DeletePackages()
+        tools.DELETE_PACKAGES()
         import zipfile
         import sys
         dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Backup In Progress..",'', 'Please Wait')
@@ -362,7 +551,6 @@ def RESTORE_ZIP_FILE(url):
         extract.all(ZIPFILE,DIR,dp)
 
         time.sleep(1)
-        XfinityInstaller()
         xbmc.executebuiltin('UpdateLocalAddons ')
         xbmc.executebuiltin("UpdateAddonRepos")
         dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "The selected system files have been restored successfully!",'','')
@@ -401,110 +589,20 @@ def RESTORE_BACKUP_XML(name,url,description):
     dialog.ok("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", "", 'All Done !','')
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO DELETE DOWNLOAD PACKAGES/ZIP FILES
-def DeletePackages():
-    print '############################################################       DELETING PACKAGES             ###############################################################'
-    packages_cache_path = xbmc.translatePath(os.path.join('special://home/addons/packages', ''))
-
-    for root, dirs, files in os.walk(packages_cache_path):
-        file_count = 0
-        file_count += len(files)
-
-    # Count files and give option to delete
-        if file_count > 0:
-
-            for f in files:
-                os.unlink(os.path.join(root, f))
-            for d in dirs:
-                shutil.rmtree(os.path.join(root, d))
-
-#---------------------------------------------------------------------------------------------------
-#FUNCTION TO FORCE CLOSE XBMC/KODI
-#ADDED MYSELF
-def KILLXBMC():
-    dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'To finish you will need to  [COLOR lime][B]RELAUNCH KODI[/B][/COLOR] once it has force closed','') #'We will now attempt to force close Kodi, this is', 'to be used if having problems with guisettings.xml', 'sticking. Would you like to continue?'
-    myplatform = PLATFORM()
-    print "Platform: " + str(myplatform)
-    if myplatform == 'osx': # OSX
-        print "############   try osx force close  #################"
-        try: os.system('killall -9 XBMC')
-        except: pass
-        try: os.system('killall -9 Kodi')
-        except: pass
-        dialog.ok("[COLOR red][B]WARNING  !!![/COLOR][/B]", "If you\'re seeing this message it means the force close", "was unsuccessful. Please force close Kodi [COLOR red]DO NOT[/COLOR] exit cleanly via the menu.",'')
-    elif myplatform == 'linux': #Linux
-        print "############   try linux force close  #################"
-        try: os.system('killall XBMC')
-        except: pass
-        try: os.system('killall Kodi')
-        except: pass
-        try: os.system('killall -9 xbmc.bin')
-        except: pass
-        try: os.system('killall -9 kodi.bin')
-        except: pass
-        dialog.ok("[COLOR red][B]WARNING  !!![/COLOR][/B]", "If you\'re seeing this message it means the force close", "was unsuccessful. Please force close Kodi [COLOR red]DO NOT[/COLOR] exit cleanly via the menu.",'')
-    elif myplatform == 'android': # Android
-        print "############   try android force close  #################"
-        try: os.system('adb shell am force-stop org.xbmc.kodi')
-        except: pass
-        try: os.system('adb shell am force-stop org.kodi')
-        except: pass
-        try: os.system('adb shell am force-stop org.xbmc.xbmc')
-        except: pass
-        try: os.system('adb shell am force-stop org.xbmc')
-        except: pass
-        dialog.ok("[COLOR red][B]WARNING  !!![/COLOR][/B]", "Your system has been detected as Android, you ", "[COLOR=yellow][B]MUST[/COLOR][/B] force close Kodi. [COLOR red]DO NOT[/COLOR] exit cleanly via the menu.","Pulling the power cable is the simplest method to force close.")
-    elif myplatform == 'windows': # Windows
-        print "############   try windows force close  #################"
-        try:
-            os.system('@ECHO off')
-            os.system('tskill XBMC.exe')
-        except: pass
-        try:
-            os.system('@ECHO off')
-            os.system('tskill Kodi.exe')
-        except: pass
-        try:
-            os.system('@ECHO off')
-            os.system('TASKKILL /im Kodi.exe /f')
-        except: pass
-        try:
-            os.system('@ECHO off')
-            os.system('TASKKILL /im XBMC.exe /f')
-        except: pass
-        dialog.ok("[COLOR red][B]WARNING  !!![/COLOR][/B]", "If you\'re seeing this message it means the force close", "was unsuccessful. Please force close Kodi [COLOR red]DO NOT[/COLOR] exit cleanly via the menu.","Use task manager and NOT ALT F4")
-    else: #ATV
-        print "############   try atv force close  #################"
-        try: os.system('killall AppleTV')
-        except: pass
-        print "############   try raspbmc force close  #################" #OSMC / Raspbmc
-        try: os.system('sudo initctl stop kodi')
-        except: pass
-        try: os.system('sudo initctl stop xbmc')
-        except: pass
-        dialog.ok("[COLOR red][B]WARNING  !!![/COLOR][/B]", "If you\'re seeing this message it means the force close", "was unsuccessful. Please force close Kodi [COLOR red]DO NOT[/COLOR] exit cleanly via the menu.","Your platform could not be detected so just pull the power cable.")
-
-#---------------------------------------------------------------------------------------------------
-#ADDED MYSELF
-#Could possibly do away with this and use xbmc.getInfoLabel("System.BuildVersion") in the killxbmc function
-def PLATFORM():
-    if xbmc.getCondVisibility('system.platform.android'):
-        return 'android'
-    elif xbmc.getCondVisibility('system.platform.linux'):
-        return 'linux'
-    elif xbmc.getCondVisibility('system.platform.windows'):
-        return 'windows'
-    elif xbmc.getCondVisibility('system.platform.osx'):
-        return 'osx'
-    elif xbmc.getCondVisibility('system.platform.atv2'):
-        return 'atv2'
-    elif xbmc.getCondVisibility('system.platform.ios'):
-        return 'ios'
+#FUNCTION TO DELETE DOWNLOADED PACKAGES/ZIP FILES
+def KODI_CLEANER():
+    choice = xbmcgui.Dialog().yesno('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'This will free up space by deleting the zip install files of your addons, clear your textures13.db file and remove your thumbnails folder. Thumbnails will automatically be repopulated after a restart. Do you want to continue?', nolabel='NO, CANCEL',yeslabel='YES, DELETE')
+    if choice == 1:
+        tools.DELETE_PACKAGES()
+        cache.Remove_Textures()
+        tools.DESTROY_PATH(THUMBNAILS)
+        choice = xbmcgui.Dialog().yesno('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'All Packages and Cache have been deleted successfully.', 'You must now restart Kodi, would you like to quit now?','', nolabel='NO, RESTART LATER',yeslabel='YES, QUIT')
+        if choice == 1:
+            tools.KILL_XBMC()
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO WIPE ENTIRE XBMC/KODI BUILD - FRESH START - EXCLUDES THE ICT WIZARD
-#ADDED MYSELF
-def WIPEXBMC():
+def WIPE_XBMC():
     if skin!= "skin.confluence":
         dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Please switch to the default Confluence skin','before performing a wipe.','')
         xbmc.executebuiltin("ActivateWindow(appearancesettings)")
@@ -512,7 +610,7 @@ def WIPEXBMC():
     else:
         choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", '[COLOR red]VERY IMPORTANT[/COLOR]: This will completely wipe your install.', 'Would you like to create a [COLOR lime][B]BACKUP[/B][/COLOR] before proceeding?', '', yeslabel='YES, BACKUP',nolabel='NO, CONTINUE')
         if choice == 1:
-            BACKUP()
+            FULL_UNIVERSAL_BACKUP()
         choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'Are you [COLOR lime][B]Absolutely Certain[/B][/COLOR] you want to wipe this install?', '', 'All addons and settings will be completely wiped!', yeslabel='YES, WIPE',nolabel='NO, CANCEL')
         if choice == 0:
             return
@@ -531,40 +629,23 @@ def WIPEXBMC():
                         try: os.rmdir(os.path.join(root,name)); os.rmdir(root)
                         except: pass
  #               if not failed:
- #                   print"community.builds.WIPEXBMC All user files removed, you now have a clean install"
+ #                   print"community.builds.WIPE_XBMC All user files removed, you now have a clean install"
  #                   dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Wipe Successful, please restart Kodi for changes to take effect.','','')
  #               else:
- #                   print"community.builds.WipeXBMC User files partially removed"
+ #                   print"community.builds.WIPE_XBMC User files partially removed"
  #                   dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Wipe Successful, please restart Kodi for changes to take effect.','','')
             except: pass
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
-        REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
+        tools.REMOVE_EMPTY_FOLDERS()
         dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Wipe Successful, please restart Kodi for changes to take effect.','','')
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO REMOVE ANY EMPTY FOLDER LEFT BEHIND AFTER WIPE
-#ADDED MYSELF
-def REMOVE_EMPTY_FOLDERS():
-#initialize the counters
-    print"########### Start Removing Empty Folders #########"
-    empty_count = 0
-    used_count = 0
-    for curdir, subdirs, files in os.walk(HOME):
-        if len(subdirs) == 0 and len(files) == 0: #check for empty directories. len(files) == 0 may be overkill
-            empty_count += 1 #increment empty_count
-            os.rmdir(curdir) #delete the directory
-            print "successfully removed: "+curdir
-        elif len(subdirs) > 0 and len(files) > 0: #check for used directories
-            used_count += 1 #increment used_count
-
-#---------------------------------------------------------------------------------------------------
 #FUNCTION TO OPEN ADDON/WIZARD SETTINGS
-#ADDED MYSELF
 def ADDON_SETTINGS():
     ADDON.openSettings(sys.argv[0])
 
@@ -611,6 +692,7 @@ fanart=None
 description=None
 localbuildcheck=None
 localversioncheck=None
+unlocked=None
 
 #---------------------------------------------------------------------------------------------------
 try:
@@ -639,7 +721,6 @@ except:
         pass
 
 #---------------------------------------------------------------------------------------------------
-#ADDED MYSELF
 print str(PATH)+': '+str(VERSION)
 print "Mode: "+str(mode)
 print "URL: "+str(url)
@@ -647,7 +728,6 @@ print "Name: "+str(name)
 print "IconImage: "+str(iconimage)
 
 #---------------------------------------------------------------------------------------------------
-#ADDED MYSELF
 def setView(content, viewType):
     # set content type so library shows more views and info
     if content:
@@ -663,12 +743,12 @@ elif mode==1:
         BACKUP_OPTION()
 
 elif mode==2:
-        print "############   RESTORE  #################"
-        RESTORE()
+        print "############   RESTORE_UNIVERSAL_BACKUP  #################"
+        RESTORE_UNIVERSAL_BACKUP()
 
 elif mode==3:
-        print "############   BACKUP  #################"
-        BACKUP()
+        print "############   FULL_UNIVERSALL_BACKUP  #################"
+        FULL_UNIVERSAL_BACKUP()
 
 elif mode==4:
         print "############   RESTORE_BACKUP_XML #################"
@@ -682,24 +762,32 @@ elif mode==6:
         print "############   RESTORE_ZIP_FILE   #################"
         RESTORE_ZIP_FILE(url)
 
-#ADDED MYSELF
 elif mode==7:
         print "############   UPDATE_WIZARD   #################"
         UPDATE_WIZARD(name,url,description)
 
-# ADDED MYSELF
 elif mode==8:
         print "############   WIPE_XBMC   #################"
-        WIPEXBMC()
+        WIPE_XBMC()
 
-#ADDED MYSELF
 #elif mode==9:
         #print "############   GUI_WIZARD   #################"
         #GUI_WIZARD(name,url,description)
 
-#ADDED MYSELF
 elif mode==10:
         print "############   OPEN_ADDON_SETTINGS   #################"
         ADDON_SETTINGS()
+
+elif mode==11:
+        print "############   KODI_CLEANER   #################"
+        KODI_CLEANER()
+
+elif mode==12:
+        print "############   RESTORE_LOCAL_GUI   #################"
+        RESTORE_LOCAL_GUI()
+
+elif mode==13:
+        print "############   FREE_UPDATE_WIZARD   #################"
+        FREE_UPDATE_WIZARD(name,url,description)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
