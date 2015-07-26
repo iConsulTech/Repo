@@ -1,9 +1,0 @@
-v1.0.1
-Added Kodi Cleaner
-Added Login For Build Updates
-Updated URLS
-Updated Backup Method (Now Creates Universal Backups)
-
-
-v1.0.0
-Initial Release

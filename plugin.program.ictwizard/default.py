@@ -45,6 +45,7 @@ HOME         =  xbmc.translatePath('special://home/')
 tempfile     =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'temp.xml'))
 guitemp      =  xbmc.translatePath(os.path.join(userdatafolder,'guitemp',''))
 idfile       =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'id.xml'))
+PROFILES     =  xbmc.translatePath(os.path.join(USERDATA,'profiles.xml'))
 
 VERSION      = "1.0.1"
 PATH         = "iConsulTech Wizard"
@@ -436,7 +437,135 @@ def RESTORE_LOCAL_GUI():
         return
     else:
         local=1
-        GUI_Settings_Fix(guifilename,local)
+        GUI_SETTINGS_FIX(guifilename,local)
+
+#---------------------------------------------------------------------------------------------------
+#FUNCTION TO FIX GUI SETTINGS
+def GUI_SETTINGS_FIX(url,local):
+    if zip == '':
+        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Backup folder cannot be found.\nPlease update the Wizard Settings and try again.','','')
+        ADDON.openSettings(sys.argv[0])
+    choice = xbmcgui.Dialog().yesno(name, 'This will over-write your existing guisettings.xml.', 'Are you sure this is the build you have installed?', '', nolabel='No, Cancel',yeslabel='Yes, Fix')
+    if choice == 0:
+        return
+    elif choice == 1:
+        GUI_MERGE(url,local)
+
+#---------------------------------------------------------------------------------------------------
+#FUNCTION TO MERGE LOCAL GUI SETTINGS XML
+def GUI_MERGE(url,local):
+    profiles_included=0
+    keep_profiles=1
+    if os.path.exists(GUINEW):
+        os.remove(GUINEW)
+    if os.path.exists(GUIFIX):
+        os.remove(GUIFIX)
+    if os.path.exists(PROFILES):
+        os.remove(PROFILES)
+    if not os.path.exists(guitemp):
+        os.makedirs(guitemp)
+    dp.create("Community Builds","Downloading guisettings.xml",'', 'Please Wait')
+    shutil.copyfile(GUI,GUINEW) #Rename guisettings.xml to guinew.xml so we can edit without XBMC interfering.
+    if local!=1:
+        lib=os.path.join(USB, 'guifix.zip')
+        downloader.download(url, lib, dp) #Download guisettings from the build
+    else:
+        lib=xbmc.translatePath(url)
+    tools.READ_ZIP(lib)
+    dp.create("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]","Checking.. ",'', 'Please Wait')
+    dp.update(0,"", "Extracting GUI File...")
+    extract.all(lib,guitemp,dp)
+    try:
+        readfile = open(guitemp+'profiles.xml', mode='r')
+        default_contents = readfile.read()
+        readfile.close()
+        if os.path.exists(guitemp+'profiles.xml'):
+            choice = xbmcgui.Dialog().yesno("PROFILES DETECTED", 'This build has profiles included, would you like to overwrite', 'your existing profiles or keep the ones you have?', '', nolabel='Keep my profiles',yeslabel='Use new profiles')
+            if choice == 0:
+                pass
+            elif choice == 1:
+                writefile = open(PROFILES, mode='w')
+                time.sleep(1)
+                writefile.write(default_contents)
+                time.sleep(1)
+                writefile.close()
+                keep_profiles=0
+    except: print"no profiles.xml file"
+    os.rename(guitemp+'guisettings.xml',GUIFIX) #Copy to addon_data folder so profiles can be dealt with
+ # had to move elsewhere in case a profiles.xml is included  os.rename(GUI,GUIFIX)
+    time.sleep(1)
+    localfile = open(GUINEW, mode='r') #Read the original skinsettings tags and store in memory ready to replace in guinew.xml
+    content = file.read(localfile)
+    file.close(localfile)
+    skinsettingsorig = re.compile('<skinsettings>[\s\S]*?<\/skinsettings>').findall(content)
+    skinorig  = skinsettingsorig[0] if (len(skinsettingsorig) > 0) else ''
+    skindefault = re.compile('<skin default[\s\S]*?<\/skin>').findall(content)
+    skindefaultorig  = skindefault[0] if (len(skindefault) > 0) else ''
+    lookandfeelorig = re.compile('<lookandfeel>[\s\S]*?<\/lookandfeel>').findall(content)
+    lookandfeel  = lookandfeelorig[0] if (len(lookandfeelorig) > 0) else ''
+    localfile2 = open(GUIFIX, mode='r')
+    content2 = file.read(localfile2)
+    file.close(localfile2)
+    skinsettingscontent = re.compile('<skinsettings>[\s\S]*?<\/skinsettings>').findall(content2)
+    skinsettingstext  = skinsettingscontent[0] if (len(skinsettingscontent) > 0) else ''
+    skindefaultcontent = re.compile('<skin default[\s\S]*?<\/skin>').findall(content2)
+    skindefaulttext  = skindefaultcontent[0] if (len(skindefaultcontent) > 0) else ''
+    lookandfeelcontent = re.compile('<lookandfeel>[\s\S]*?<\/lookandfeel>').findall(content2)
+    lookandfeeltext  = lookandfeelcontent[0] if (len(lookandfeelcontent) > 0) else ''
+    replacefile = content.replace(skinorig,skinsettingstext).replace(lookandfeel,lookandfeeltext).replace(skindefaultorig,skindefaulttext)
+    writefile = open(GUINEW, mode='w+')
+    writefile.write(str(replacefile))
+    writefile.close()
+    if os.path.exists(GUI):
+        try:
+            os.remove(GUI)
+            success=True
+        except:
+            dialog.ok("Oops we have a problem", 'There was an error trying to complete this process.', 'Please try this step again, if it still fails you may', 'need to restart Kodi and try again.')
+            success=False
+    try:
+        os.rename(GUINEW,GUI)
+        os.remove(GUIFIX)
+    except:
+        pass
+    if success==True:
+        try:
+            localfile = open(tempfile, mode='r')
+            content = file.read(localfile)
+            file.close(localfile)
+            temp = re.compile('id="(.+?)"').findall(content)
+            tempcheck  = temp[0] if (len(temp) > 0) else ''
+            tempname = re.compile('name="(.+?)"').findall(content)
+            namecheck  = tempname[0] if (len(tempname) > 0) else ''
+            tempversion = re.compile('version="(.+?)"').findall(content)
+            versioncheck  = tempversion[0] if (len(tempversion) > 0) else ''
+            writefile = open(idfile, mode='w+')
+            writefile.write('id="'+str(tempcheck)+'"\nname="'+namecheck+'"\nversion="'+versioncheck+'"')
+            writefile.close()
+            localfile = open(startuppath, mode='r')
+            content = file.read(localfile)
+            file.close(localfile)
+            localversionmatch = re.compile('version="(.+?)"').findall(content)
+            localversioncheck  = localversionmatch[0] if (len(localversionmatch) > 0) else ''
+            replacefile = content.replace(localversioncheck,versioncheck)
+            writefile = open(startuppath, mode='w')
+            writefile.write(str(replacefile))
+            writefile.close()
+            os.remove(tempfile)
+        except:
+            writefile = open(idfile, mode='w+')
+            writefile.write('id="None"\nname="Unknown"\nversion="Unknown"')
+            writefile.close()
+    if os.path.exists(guitemp+'profiles.xml'):
+        os.remove(guitemp+'profiles.xml')
+    if keep_profiles==0:
+        dialog.ok("PROFILES DETECTED", 'Unfortunately the only way to get the new profiles to stick is', 'to force close kodi. Either do this via the task manager,', 'terminal or system settings. DO NOT use the quit/exit options in Kodi.')
+        tools.KILL_XBMC()
+    else:
+        if success==True:
+            dialog.ok("guisettings.xml fix complete", 'Please restart Kodi. If the skin doesn\'t look', 'quite right on the next boot you may need to', 'force close Kodi.')
+    if os.path.exists(guitemp):
+        os.removedirs(guitemp)
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE THE BACKUP OPTIONS IN THE SYSTEM BACKUP TOOLS MENU
@@ -511,7 +640,6 @@ def RESTORE_ZIP_FILE(url):
     else:
         ZIPFILE = xbmc.translatePath(os.path.join(USB,'addon_data.zip'))
         DIR = ADDON_DATA
-
 
     if 'Backup' in name:
         tools.DELETE_PACKAGES()
@@ -642,7 +770,8 @@ def WIPE_XBMC():
         tools.REMOVE_EMPTY_FOLDERS()
         tools.REMOVE_EMPTY_FOLDERS()
         tools.REMOVE_EMPTY_FOLDERS()
-        dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Wipe Successful, please restart Kodi for changes to take effect.','','')
+        #dialog.ok('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]','Wipe Successful, please restart Kodi for changes to take effect.','','')
+        tools.KILL_XBMC()
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO OPEN ADDON/WIZARD SETTINGS

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.program.ictwizard" name=" [COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]" version="1.0.1" provider-name=" [COLOR dodgerblue]i[/COLOR][COLOR white]ConsulTech Wizard[/COLOR]">
+<addon id="plugin.program.ictwizard" name=" [COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]" version="1.0.2" provider-name=" [COLOR dodgerblue]i[/COLOR][COLOR white]ConsulTech Wizard[/COLOR]">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.module.requests" version="2.6.0"/>
@@ -9,8 +9,8 @@
         <provides>executable</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
-    <summary lang="en">iConsulTech Wizard - Update | Backup | Restore</summary>
-    <description lang="en">Easy Update, Backup and Restore with iConsulTech Wizard!</description>
+    <summary lang="en">iConsulTech Wizard - Update | Backup | Restore | Maintain</summary>
+    <description lang="en">Easily Update, Backup, Restore and Maintain your Kodi build with the iConsulTech Wizard! Credits to: XunityTalk, WHUFCLEE, DixieDean, Dan Elmore and KTV</description>
     <platform>all</platform>
   </extension>
 </addon>
