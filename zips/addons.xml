@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.program.ictwizard" name=" [COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]" version="1.0.2" provider-name=" [COLOR dodgerblue]i[/COLOR][COLOR white]ConsulTech Wizard[/COLOR]">
+<addon id="plugin.program.ictwizard" name=" [COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]" version="1.0.3" provider-name=" [COLOR dodgerblue]i[/COLOR][COLOR white]ConsulTech Wizard[/COLOR]">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="script.module.requests" version="2.6.0"/>

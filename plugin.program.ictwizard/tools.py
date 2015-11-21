@@ -8,6 +8,7 @@ import downloader
 import zipfile
 import ntpath
 import requests
+from requests import session
 #import beautifulsoup
 
 #---------------------------------------------------------------------------------------------------
@@ -27,26 +28,28 @@ KEYMAPS      =  xbmc.translatePath(os.path.join(USERDATA,'keymaps','keyboard.xml
 skin         =  xbmc.getSkinDir()
 HOME         =  xbmc.translatePath('special://home/')
 notifyart    =  xbmc.translatePath(os.path.join(ADDONS,AddonID,'resources/'))
+THUMBNAILS   =  xbmc.translatePath('special://thumbnails');
+TEXTURESPATH = xbmc.translatePath('special://database')
 
 
-VERSION      = "1.0.1"
+VERSION      = "1.0.3"
 PATH         = "iConsulTech Wizard"
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO LOGIN INTO ICONSULTECH
 def ICT_LOGIN():
-    URL     = 'http://iconsultech.uk/wp-login.php'
-    USER    = ADDON.getSetting('username')
-    PASS    = ADDON.getSetting('password')
-    PAYLOAD = { 'log' : USER, 'pwd' : PASS, 'wp-submit' : 'Log In'}
+    with requests.Session() as ict:
+        URL = 'http://www.iconsultech.uk/login'
+        USER    = ADDON.getSetting('username')
+        PASS    = ADDON.getSetting('password')
+        ict.get(URL)
+        payload = {'log' : USER, 'pwd' : PASS, 'wp-submit' : 'Log In'}
+        ict.post('http://www.iconsultech.uk/login', data=payload, headers={"Referer": "http://www.iconsultech.uk"})
+        response = ict.get('http://www.iconsultech.uk/my-account')
 
-    request  = requests.post(URL, data=PAYLOAD)
-    response = request.content
-
-    return response
-
-    soup = BeautifulSoup(response)
-    soup.find_all('no active subscription')
+        #
+        # modified: return response & session
+        return {'response':response, 'session': ict}
 
 '''def USER_STATUS():
     site = requests.get("http://www.iconsultech.uk/my-account")
@@ -131,29 +134,38 @@ def READ_ZIP(url):
             f.close()
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO DO A FULL WIPE
+#FUNCTION TO DO A FULL WIPE/DELETE A DIRECTORY
 def DESTROY_PATH(path):
     #dp.create("[COLOR=dodgerblue][B]i[/COLOR][COLOR=white]ConsulTech Wizard[/B][/COLOR]","Wiping...",'', 'Please Wait')
     shutil.rmtree(path, ignore_errors=True)
 
 #---------------------------------------------------------------------------------------------------
+#FUNCTION TO DELETE TEXTURES13
+def DELETE_TEXTURES():
+    text13 = os.path.join(TEXTURESPATH,"Textures13.db")
+    os.unlink(text13)
+
+#---------------------------------------------------------------------------------------------------
 #FUNCTION TO DELETE DOWNLOADED PACKAGES/ZIP FILES
 def DELETE_PACKAGES():
     print '############################################################       DELETING PACKAGES             ###############################################################'
-    packages_cache_path = xbmc.translatePath(os.path.join('special://home/addons/packages', ''))
-    update_cache_path = xbmc.translatePath(os.path.join('special://home/Update', ''))
+    packages_path = xbmc.translatePath('special://home/addons/packages')
+    update_path = xbmc.translatePath('special://home/Update')
+    dialog = xbmcgui.Dialog()
 
-    for root, dirs, files in os.walk(packages_cache_path):
-        file_count = 0
-        file_count += len(files)
+    for root, dirs, files in os.walk(packages_path):
+            file_count = 0
+            file_count += len(files)
+    if file_count > 0:
+            for f in files:
+                os.unlink(os.path.join(root, f))
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
 
-    for root, dirs, files in os.walk(update_cache_path):
-        file_count = 0
-        file_count += len(files)
-
-    # Count files and give option to delete
-        if file_count > 0:
-
+    for root, dirs, files in os.walk(update_path):
+            file_count = 0
+            file_count += len(files)
+    if file_count > 0:
             for f in files:
                 os.unlink(os.path.join(root, f))
             for d in dirs:

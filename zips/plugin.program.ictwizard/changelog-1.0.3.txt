@@ -1,3 +1,8 @@
+v1.0.3
+Added Stealth Premium Build For NFPS Subscribers Only
+Added Login Function
+Fixed Kodi Cleaner (1 Click Cleaning Process)
+
 v1.0.2
 Added Credits To Addon XML
 Added Force Close After Wipe Device Function

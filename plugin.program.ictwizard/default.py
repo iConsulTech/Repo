@@ -47,21 +47,46 @@ guitemp      =  xbmc.translatePath(os.path.join(userdatafolder,'guitemp',''))
 idfile       =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'id.xml'))
 PROFILES     =  xbmc.translatePath(os.path.join(USERDATA,'profiles.xml'))
 
-VERSION      = "1.0.1"
+
+VERSION      = "1.0.3"
 PATH         = "iConsulTech Wizard"
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DEFINE MENU ITEMS AND LINKS
 def CATEGORIES(localbuildcheck,localversioncheck,id):
-#    response = tools.ICT_LOGIN()
+    link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard.txt').replace('\n','').replace('\r','')
+    match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
+    for name,url,iconimage,fanart,description in match:
+        addDir(name,url,13,iconimage,fanart,description)
+    link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard-sub.txt').replace('\n','').replace('\r','')
+    match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
+    for name,url,iconimage,fanart,description in match:
+        addDir(name,url,14,iconimage,fanart,description)
+    setView('movies', 'MAIN')
+    addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
+    addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
+    addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
+    addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
+    addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
 
-#    if 'login_error' in response:
-#        tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
-#        addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg','fanart','Backup Your Full System')
-#        addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg','fanart','Restore Your Full System')
-#        addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg','fanart','Delete Downloaded Zip Files')
-#        addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg','fanart','Wipe Your Entire Kodi Install')
-#        addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
+    #response = tools.ICT_LOGIN()
+
+    #if 'Max simultaneous logins' in response.content:
+    #    tools.NOTIFY('Simultaneous Login!', 'Your account has been [COLOR red]LOCKED[/COLOR] for [COLOR red]30 Minutes[/COLOR]','10000','cross.png')
+    #elif 'Too many IP addresses' in response.content:
+    #    tools.NOTIFY('Multiple IP Addresses!', 'Your account has been accessed via multiple IP addresses and is now [COLOR red]BANNED[/COLOR]','10000','cross.png')
+    #if not 'My Account' in response.content:
+        #tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
+        #link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard.txt').replace('\n','').replace('\r','')
+        #match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
+        #for name,url,iconimage,fanart,description in match:
+        #    addDir(name,url,13,iconimage,fanart,description)
+        #setView('movies', 'MAIN')
+        #addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
+        #addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
+        #addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
+        #addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
+        #addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
 
     #updatecheck = CHECK_FOR_UPDATE(localbuildcheck,localversioncheck,id)
     #if updatecheck == True:
@@ -71,19 +96,20 @@ def CATEGORIES(localbuildcheck,localversioncheck,id):
 
     #addDir('[COLOR dodgerblue]GUI[/COLOR] & Menu Fix','GUIFIX',9,'http://iconsultech.uk/tools/images/gui.jpg','fanart','Fix Your guisettings.xml')
     #addDir('[COLOR dodgerblue]Check For Update[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg','fanart','Configure the iConsultech Wizard')
+
     #else:
-    #    username = ADDON.getSetting('username')
-    #    tools.NOTIFY('Login Successful', 'Welcome back '+username,'4000','tick.png')
-        link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard.txt').replace('\n','').replace('\r','')
-        match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
-        for name,url,iconimage,fanart,description in match:
-            addDir(name,url,13,iconimage,fanart,description)
-        setView('movies', 'MAIN')
-        addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
-        addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
-        addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
-        addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
-        addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
+        #username = ADDON.getSetting('username')
+        #tools.NOTIFY('Login Successful', 'Welcome back '+username,'4000','tick.png')
+        #link = tools.OPEN_URL('http://iconsultech.uk/tools/wizard/wizard-sub.txt').replace('\n','').replace('\r','')
+        #match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)"').findall(link)
+        #for name,url,iconimage,fanart,description in match:
+        #    addDir(name,url,14,iconimage,fanart,description)
+        #setView('movies', 'MAIN')
+        #addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
+        #addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
+        #addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
+        #addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
+        #addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO CHECK BUILD VERSION
 #def CHECK_FOR_UPDATE(localbuildcheck,localversioncheck,id):
@@ -187,18 +213,24 @@ def FREE_UPDATE_WIZARD(name,url,description):
 
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO DOWNLOAD AND UPDATE PREMIUM KODI BUILD
-def UPDATE_WIZARD(name,url,description):
+def PREMIUM_UPDATE_WIZARD(name,url,description):
     username = ADDON.getSetting('username')
     password = ADDON.getSetting('password')
     if username == '':
         if password == '':
             tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
             return
-    response = tools.ICT_LOGIN()
-    if 'login_error' in response:
-        tools.NOTIFY('Not Logged In!', 'Please go to [COLOR lime]Wizard Settings[/COLOR] and login to download updates','10000','cross.png')
+    tools.NOTIFY('Please wait:', 'Verifying your account details...','10000','infinity.gif')
+    ict = tools.ICT_LOGIN()
+    #
+    # modified: get session too
+    response = ict.get('response')
+    session = ict.get('session')
+    if not 'My Account' in response.content:
+        tools.NOTIFY('Login Unsuccessful!', 'Please re-check your login credentials','10000','cross.png')
         return
     else:
+        tools.NOTIFY('Login Successful', 'Welcome back '+username,'4000','tick.png')
         choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'This full system update will [COLOR red][B]OVERWRITE[/B][/COLOR] everything on your current install including settings. Would you like to create a [COLOR lime][B]BACKUP[/B][/COLOR]?', yeslabel='YES, BACKUP',nolabel='NO, CONTINUE')
         if choice == 1:
             FULL_UNIVERSAL_BACKUP()
@@ -215,7 +247,9 @@ def UPDATE_WIZARD(name,url,description):
        os.remove(lib)
     except:
        pass
-    downloader.download(url, lib, dp)
+    #
+    # modified: pass session
+    downloader.download(url, lib, dp, session)
     addonfolder = xbmc.translatePath(os.path.join('special://','home'))
     time.sleep(1)
 #ZIP UP WIZARD ADDON WIPE ADDONS AND THEN UNZIP ADDON
@@ -302,7 +336,7 @@ def FULL_UNIVERSAL_BACKUP():
     vq = tools.GET_KEYBOARD( heading="Enter a name for this backup" )
     if ( not vq ): return False, 0
     title = urllib.quote_plus(vq)
-    backup_zip = xbmc.translatePath(os.path.join(USB,title+'_backup.zip'))
+    backup_zip = xbmc.translatePath(os.path.join(USB,title+'.zip'))
     exclude_dirs_full =  ['plugin.program.ictwizard']
     exclude_files_full = ["xbmc.log","xbmc.old.log","kodi.log","kodi.old.log",'.DS_Store','.setup_complete','XBMCHelper.conf']
     exclude_dirs =  ['plugin.program.ictwizard','cache', 'system', 'Thumbnails', "peripheral_data",'library','keymaps']
@@ -592,7 +626,7 @@ def RESTORE_OPTION():
     addDir('2. Select the [COLOR blue]GUI SETTINGS ZIP FILE[/COLOR] you want to restore..','url',12,'','','Restore Your GUI Settings')
 
 #    for file in os.listdir(USB):
-#        if file.endswith("_backup.zip"):
+#        if file.endswith(".zip"):
 #            addDir('1. Select the [COLOR blue]BACKUP FILE[/COLOR] you want to restore..','url',2,'','','Restore Your Entire System')
 
 #    for file in os.listdir(USB):
@@ -722,7 +756,7 @@ def KODI_CLEANER():
     choice = xbmcgui.Dialog().yesno('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'This will free up space by deleting the zip install files of your addons, clear your textures13.db file and remove your thumbnails folder. Thumbnails will automatically be repopulated after a restart. Do you want to continue?', nolabel='NO, CANCEL',yeslabel='YES, DELETE')
     if choice == 1:
         tools.DELETE_PACKAGES()
-        cache.Remove_Textures()
+        tools.DELETE_TEXTURES()
         tools.DESTROY_PATH(THUMBNAILS)
         choice = xbmcgui.Dialog().yesno('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]', 'All Packages and Cache have been deleted successfully.', 'You must now restart Kodi, would you like to quit now?','', nolabel='NO, RESTART LATER',yeslabel='YES, QUIT')
         if choice == 1:
@@ -918,5 +952,9 @@ elif mode==12:
 elif mode==13:
         print "############   FREE_UPDATE_WIZARD   #################"
         FREE_UPDATE_WIZARD(name,url,description)
+
+elif mode==14:
+        print "############   PREMIUM_UPDATE_WIZARD   #################"
+        PREMIUM_UPDATE_WIZARD(name,url,description)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
