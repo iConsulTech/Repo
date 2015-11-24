@@ -1,3 +1,6 @@
+v1.0.4
+Added NFPS subscription backup options under “Backup Tools”
+
 v1.0.3
 Added Stealth Premium Build For NFPS Subscribers Only
 Added Login Function

@@ -21,7 +21,7 @@ fanart       =  'http://iconsultech.uk/tools/images/fanart.jpg'
 ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons',''))
 ADDON        =  xbmcaddon.Addon(id='plugin.program.ictwizard')
 AddonID      =  'plugin.program.ictwizard'
-ICTADDONPATH  =  xbmc.translatePath(os.path.join(ADDONS,AddonID,'default.py'))
+ICTADDONPATH =  xbmc.translatePath(os.path.join(ADDONS,AddonID,'default.py'))
 zip          =  ADDON.getSetting('zip')
 dialog       =  xbmcgui.Dialog()
 dp           =  xbmcgui.DialogProgress()
@@ -46,6 +46,12 @@ tempfile     =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'temp.xml'))
 guitemp      =  xbmc.translatePath(os.path.join(userdatafolder,'guitemp',''))
 idfile       =  xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'id.xml'))
 PROFILES     =  xbmc.translatePath(os.path.join(USERDATA,'profiles.xml'))
+PVR_SUB_PATH =  xbmc.translatePath(os.path.join(ADDON_DATA, 'pvr.stalker'))
+PVR_SUB_2_PATH =  xbmc.translatePath(os.path.join(ADDON_DATA, 'pvr.stalker.nfps'))
+ADDON_SUB_PATH = xbmc.translatePath(os.path.join(ADDON_DATA, 'plugin.video.stalker'))
+PVR_SUB      =  xbmc.translatePath(os.path.join(PVR_SUB_PATH, 'settings.xml'))
+PVR_SUB_2      =  xbmc.translatePath(os.path.join(PVR_SUB_2_PATH, 'settings.xml'))
+ADDON_SUB    =  xbmc.translatePath(os.path.join(ADDON_SUB_PATH, 'settings.xml'))
 
 
 VERSION      = "1.0.3"
@@ -63,6 +69,7 @@ def CATEGORIES(localbuildcheck,localversioncheck,id):
     for name,url,iconimage,fanart,description in match:
         addDir(name,url,14,iconimage,fanart,description)
     setView('movies', 'MAIN')
+    #addDir('[COLOR dodgerblue]Subscription[/COLOR] Backup','url',15,'http://iconsultech.uk/tools/images/subscription.jpg',fanart,'Backup Your iNFINITE STREAMS Sub')
     addDir('[COLOR dodgerblue]Backup[/COLOR] Tools','url',1,'http://iconsultech.uk/tools/images/backup.jpg',fanart,'Backup Your Full System')
     addDir('[COLOR dodgerblue]Restore[/COLOR] System','url',5,'http://iconsultech.uk/tools/images/restore.jpg',fanart,'Restore Your Full System')
     addDir('[COLOR dodgerblue]Kodi[/COLOR] Cleaner','url',11,'http://iconsultech.uk/tools/images/cleaner.jpg',fanart,'Delete Downloaded Zip Files')
@@ -605,6 +612,12 @@ def GUI_MERGE(url,local):
 #FUNCTION TO DEFINE THE BACKUP OPTIONS IN THE SYSTEM BACKUP TOOLS MENU
 def BACKUP_OPTION():
     addDir('[COLOR blue]FULL SYSTEM BACKUP[/COLOR] + [COLOR blue]GUI SETTINGS[/COLOR]','url',3,'','','Backup Your Entire System',)
+    if os.path.exists(ADDON_SUB):
+        addDir('[COLOR yellow]Backup iNFINITE STREAMS Stalker Addon Subscription[/COLOR]',ADDON_SUB,4,'','','Backup Your iNFINITE STREAMS Stalker Addon Subscription')
+    if os.path.exists(PVR_SUB):
+        addDir('[COLOR yellow]Backup iNFINITE STREAMS PVR Subscription[/COLOR]',PVR_SUB,4,'','','Backup Your iNFINITE STREAMS PVR Subscription')
+    if os.path.exists(PVR_SUB_2):
+        addDir('[COLOR yellow]Backup iNFINITE STREAMS PVR Subscription[/COLOR]',PVR_SUB_2,4,'','','Backup Your iNFINITE STREAMS PVR Subscription Alt')
     addDir('Backup Addons [COLOR blue]ONLY[/COLOR]','addons',6,'','','Backup Your Addons')
     addDir('Backup Addon UserData [COLOR blue]ONLY[/COLOR]','addon_data',6,'','','Backup Your Addon Userdata')
     addDir('Backup Guisettings.xml',GUI,4,'','','Backup Your guisettings.xml')
@@ -632,6 +645,15 @@ def RESTORE_OPTION():
 #    for file in os.listdir(USB):
 #        if file.endswith("_guisettings.zip"):
 #            addDir('2. Select the [COLOR blue]GUI SETTINGS ZIP FILE[/COLOR] you want to restore..','url',12,'','','Restore Your GUI Settings')
+
+    if os.path.exists(os.path.join(USB,'iNFINITE STREAMS Stalker Addon Subscription')):
+        addDir('[COLOR yellow]Restore iNFINITE STREAMS Stalker Addon Subscription[/COLOR]',ADDON_SUB,4,'','','Restore Your iNFINITE STREAMS Stalker Addon Subscription')
+
+    if os.path.exists(os.path.join(USB,'iNFINITE STREAMS PVR Subscription')):
+        addDir('[COLOR yellow]Restore iNFINITE STREAMS PVR Subscription[/COLOR]',PVR_SUB,4,'','','Restore Your iNFINITE STREAMS PVR Subscription')
+
+    if os.path.exists(os.path.join(USB,'iNFINITE STREAMS PVR Subscription')):
+        addDir('[COLOR yellow]Restore iNFINITE STREAMS PVR Subscription[/COLOR]',PVR_SUB_2,4,'','','Restore Your iNFINITE STREAMS PVR Subscription Alt')
 
     if os.path.exists(os.path.join(USB,'addons.zip')):
         addDir('Restore Addons [COLOR blue]ONLY[/COLOR]','addons',6,'','','Restore Your Addons')
@@ -956,5 +978,9 @@ elif mode==13:
 elif mode==14:
         print "############   PREMIUM_UPDATE_WIZARD   #################"
         PREMIUM_UPDATE_WIZARD(name,url,description)
+
+elif mode==15:
+        print "############   SUBSCRIPTION_BACKUP   #################"
+        SUBSCRIPTION_BACKUP()
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))
