@@ -32,7 +32,6 @@ THUMBNAILS   =  xbmc.translatePath('special://thumbnails');
 TEXTURESPATH = xbmc.translatePath('special://database')
 
 
-VERSION      = "1.0.3"
 PATH         = "iConsulTech Wizard"
 
 #---------------------------------------------------------------------------------------------------

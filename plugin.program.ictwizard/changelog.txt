@@ -1,5 +1,9 @@
+v1.0.5
+Added Build Update Notifications
+Added Auto Update Feature for NFPS subscribers (Stealth Build Users)
+
 v1.0.4
-Added NFPS subscription backup options under “Backup Tools”
+Added NFPS Subscription Backup Options Under “Backup Tools”
 
 v1.0.3
 Added Stealth Premium Build For NFPS Subscribers Only
@@ -16,7 +20,6 @@ Added Kodi Cleaner
 Added Login For Build Updates (Future Proof For Premium Build!)
 Updated URLS
 Updated Backup Method (Now Creates Universal Backups)
-
 
 v1.0.0
 Initial Release
