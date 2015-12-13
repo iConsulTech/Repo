@@ -19,7 +19,6 @@ USER_AGENT   =  'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gec
 base         =  'http://iconsultech.uk/tools/'
 fanart       =  'http://iconsultech.uk/tools/images/fanart.jpg'
 version_url  = 'http://iconsultech.uk/tools/version.txt'
-version_url  = 'http://xstead.com/version.txt'
 ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons',''))
 ADDON        =  xbmcaddon.Addon(id='plugin.program.ictwizard')
 AddonID      =  'plugin.program.ictwizard'
