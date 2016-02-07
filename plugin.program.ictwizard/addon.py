@@ -18,7 +18,7 @@ import requests
 USER_AGENT   =  'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
 base         =  'http://iconsultech.uk/tools/'
 fanart       =  'http://iconsultech.uk/tools/images/fanart.jpg'
-version_url  = 'http://iconsultech.uk/tools/version.txt'
+version_url  =  'http://iconsultech.uk/tools/version.txt'
 ADDONS       =  xbmc.translatePath(os.path.join('special://home','addons',''))
 ADDON        =  xbmcaddon.Addon(id='plugin.program.ictwizard')
 AddonID      =  'plugin.program.ictwizard'
@@ -52,6 +52,7 @@ PVR_SUB_PATH =  xbmc.translatePath(os.path.join(ADDON_DATA, 'pvr.stalker'))
 PVR_SUB_2_PATH =  xbmc.translatePath(os.path.join(ADDON_DATA, 'pvr.stalker.nfps'))
 PVR_SUB      =  xbmc.translatePath(os.path.join(PVR_SUB_PATH, 'settings.xml'))
 PVR_SUB_2    =  xbmc.translatePath(os.path.join(PVR_SUB_2_PATH, 'settings.xml'))
+ICTSETTINGSPATH = xbmc.translatePath(os.path.join(ADDON_DATA,AddonID,'settings.xml'))
 
 VERSION      = "1.0.5"
 PATH         = "iConsulTech Wizard"
@@ -74,11 +75,9 @@ def CATEGORIES(id):
     addDir('[COLOR dodgerblue]Wipe[/COLOR] Device','url',8,'http://iconsultech.uk/tools/images/wipe.jpg',fanart,'Wipe Your Entire Kodi Install')
     addDir('[COLOR dodgerblue]Wizard[/COLOR] Settings','url',10,'http://iconsultech.uk/tools/images/settings.jpg',fanart,'Configure the iConsultech Wizard')
 
-
-
 #---------------------------------------------------------------------------------------------------
 #FUNCTION TO SAVE CURRENTLY INSTALLED VERSION
-def SAVE_CURRENT_VERSION(build='free_version'):
+def SAVE_CURRENT_VERSION(build='origin_version'):
 
     relased_versions = tools.OPEN_URL(version_url)
     versions = {}
@@ -97,8 +96,6 @@ def SAVE_CURRENT_VERSION(build='free_version'):
         f = open(VERSIONPATH, mode='w')
         f.write('='.join([build, current_version]))
         f.close()
-
-
 
 #---------------------------------------------------------------------------------------------------
 def ICONSULTECH():
@@ -125,7 +122,7 @@ def ICONSULTECH():
             f.close()
 
 #---------------------------------------------------------------------------------------------------
-#FUNCTION TO DOWNLOAD AND UPDATE PREMIUM KODI BUILD
+#FUNCTION TO DOWNLOAD AND UPDATE KODI BUILD
 def FREE_UPDATE_WIZARD(name,url,description):
     choice = xbmcgui.Dialog().yesno("[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]", 'This full system update will [COLOR red][B]OVERWRITE[/B][/COLOR] everything on your current install including settings. Would you like to create a [COLOR lime][B]BACKUP[/B][/COLOR]?', yeslabel='YES, BACKUP',nolabel='NO, CONTINUE')
     if choice == 1:
@@ -335,7 +332,7 @@ def FULL_UNIVERSAL_BACKUP():
     backup_zip = xbmc.translatePath(os.path.join(USB,title+'.zip'))
     exclude_dirs_full =  ['plugin.program.ictwizard']
     exclude_files_full = ["xbmc.log","xbmc.old.log","kodi.log","kodi.old.log",'.DS_Store','.setup_complete','XBMCHelper.conf']
-    exclude_dirs =  ['plugin.program.ictwizard','cache', 'system', 'Thumbnails', "peripheral_data",'library','keymaps']
+    exclude_dirs =  ['cache', 'system', 'Thumbnails', "peripheral_data",'library','keymaps']
     exclude_files = ["xbmc.log","xbmc.old.log","kodi.log","kodi.old.log","Textures13.db",'.DS_Store','.setup_complete','XBMCHelper.conf', 'advancedsettings.xml']
     message_header = "Checking and Preparing Files"
     message_header2 = "Creating Full System Backup"

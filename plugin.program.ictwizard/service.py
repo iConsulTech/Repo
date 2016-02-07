@@ -107,10 +107,12 @@ class Main:
             self.notify('[COLOR dodgerblue][B]i[/COLOR][COLOR white]ConsulTech Wizard[/B][/COLOR]',
                         '[COLOR white]NEW[/COLOR] [COLOR=lime]UPDATE[/COLOR] [COLOR white]AVAILABLE[/COLOR] [COLOR=dodgerblue]v'+str(check_version)+'[/COLOR]','20000','update.png')
 
-            if current.get('type') == 'premium_version':
+            if current.get('type') == 'vertigo_version':
+                if current.get('type') == 'stealth_version':
+                    if current.get('type') == 'ruyaflix_version':
 
-                auto_update_enabled = (xbmcaddon.Addon(id='plugin.program.ictwizard').getSetting('auto-update') == "true" )
-                log("auto_update_enabled: %s" % auto_update_enabled)
+                        auto_update_enabled = (xbmcaddon.Addon(id='plugin.program.ictwizard').getSetting('auto-update') == "true" )
+                        log("auto_update_enabled: %s" % auto_update_enabled)
                 if auto_update_enabled == True:
                     self.run_auto_update()
                 else:

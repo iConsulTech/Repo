@@ -240,7 +240,7 @@ def ARCHIVE_TREE(sourcefile, destfile, message_header, message1, message2, messa
             dp.update(int(progress),"Backing Up",'[COLOR yellow]%s[/COLOR]'%file, 'Please Wait')
             fn = os.path.join(base, file)
             if not 'temp' in dirs:
-                if not 'plugin.program.TotalRevolution' in dirs:
+                if not 'plugin.program.ictwizard' in dirs:
                    import time
                    FORCE= '01/01/1980'
                    FILE_DATE=time.strftime('%d/%m/%Y', time.gmtime(os.path.getmtime(fn)))
